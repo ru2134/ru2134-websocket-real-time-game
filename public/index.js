@@ -5,8 +5,6 @@ import Score from './Score.js';
 import ItemController from './ItemController.js';
 import './Socket.js';
 import { sendEvent } from './Socket.js';
-import stageTable from './assets/stage.json' with { type: 'json' };
-
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -40,9 +38,11 @@ const CACTI_CONFIG = [
 // 아이템
 const ITEM_CONFIG = [
   { width: 50 / 1.5, height: 50 / 1.5, id: 1, image: 'images/items/pokeball_red.png' },
-  { width: 50 / 1.5, height: 50 / 1.5, id: 2, image: 'images/items/pokeball_yellow.png' },
-  { width: 50 / 1.5, height: 50 / 1.5, id: 3, image: 'images/items/pokeball_purple.png' },
+  { width: 50 / 1.5, height: 50 / 1.5, id: 2, image: 'images/items/pokeball_orange.png' },
+  { width: 50 / 1.5, height: 50 / 1.5, id: 3, image: 'images/items/pokeball_yellow.png' },
   { width: 50 / 1.5, height: 50 / 1.5, id: 4, image: 'images/items/pokeball_cyan.png' },
+  { width: 50 / 1.5, height: 50 / 1.5, id: 5, image: 'images/items/pokeball_purple.png' },
+  { width: 50 / 1.5, height: 50 / 1.5, id: 6, image: 'images/items/pokeball_pink.png' },
 ];
 
 // 게임 요소들
@@ -58,6 +58,10 @@ let gameSpeed = GAME_SPEED_START;
 let gameover = false;
 let hasAddedEventListenersForRestart = false;
 let waitingToStart = true;
+
+export const setHighScore = (highScore) => {
+  staticHighScore = highScore;
+};
 
 function createSprites() {
   // 비율에 맞는 크기
@@ -107,7 +111,7 @@ function createSprites() {
 
   itemController = new ItemController(ctx, itemImages, scaleRatio, GROUND_SPEED);
 
-  score = new Score(ctx, scaleRatio, stageTable.data);
+  score = new Score(ctx, scaleRatio);
 }
 
 function getScaleRatio() {
@@ -167,6 +171,7 @@ function reset() {
   cactiController.reset();
   score.reset();
   gameSpeed = GAME_SPEED_START;
+  // 게임시작 핸들러ID 2, payload에는 게임 시작 시간
   sendEvent(2, { timestamp: Date.now() });
 }
 
@@ -205,20 +210,32 @@ function gameLoop(currentTime) {
     ground.update(gameSpeed, deltaTime);
     // 선인장
     cactiController.update(gameSpeed, deltaTime);
-    itemController.update(gameSpeed, deltaTime);
+
+    // 현재 스테이지 인덱스
+    const stageIndex = score.getStageLevel();
+
+    // 아이템
+    itemController.update(gameSpeed, deltaTime, stageIndex);
+
     // 달리기
     player.update(gameSpeed, deltaTime);
     updateGameSpeed(deltaTime);
 
+    // 게임 중일 때 점수 변경
     score.update(deltaTime);
   }
 
+  // 게임 종료
   if (!gameover && cactiController.collideWith(player)) {
+    console.log('game over');
     gameover = true;
-    score.setHighScore();
-    sendEvent(3, { timestamp: Date.now(), score: Math.floor(score.score) });
+
+    const gameScore = score.getScore();
+    sendEvent(3, { timestamp: Date.now(), score: gameScore });
+
     setupGameReset();
   }
+
   const collideWithItem = itemController.collideWith(player);
   if (collideWithItem && collideWithItem.itemId) {
     score.getItem(collideWithItem.itemId);
