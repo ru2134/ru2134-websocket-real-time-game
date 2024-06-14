@@ -38,6 +38,8 @@ export const moveStageHandler = (userId, payload) => {
   // 점수 검증
   const serverTime = Date.now();
   const totalScore = calculateTotalScore(currentStages, serverTime, true);
+  const totalScore  = calculateTotalScore(currentStage, serverTime, true, userItems);
+
 
   if (targetStageInfo.score !== totalScore) {
     return { status: 'fail', message: 'Invalid elapsed time' };
