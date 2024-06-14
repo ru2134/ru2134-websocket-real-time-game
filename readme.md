@@ -18,5 +18,8 @@ Socket.io
 ![image](https://github.com/ru2134/ru2134-websocket-real-time-game/assets/167045410/edbaf93a-c824-4b5c-b3b8-fc7b9abf072b)
 
 
+
+
+
 ![스크린샷(436)](https://github.com/ru2134/ru2134-websocket-real-time-game/assets/167045410/fae8ba15-9e56-4297-a608-fe52d5bd7c8b)
 손이 아파서 스테이지 1도 못넘어감......
