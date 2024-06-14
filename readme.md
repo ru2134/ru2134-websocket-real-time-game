@@ -7,3 +7,4 @@
 
 .. 
 점프 액션 게임 
+npm run dev로 'http://localhost:3000', 열림.
